@@ -477,11 +477,11 @@ public void SelectMapList()
 	ExplodeString(szTier, ".", szBuffer, 2, 32);
 
 	if (StrEqual(szBuffer[1], "0"))
-		Format(szQuery, sizeof(szQuery), "SELECT mapname, tier FROM ck_maptier WHERE tier = %s AND ranked = 1;", szBuffer[0]);
+		Format(szQuery, sizeof(szQuery), "SELECT mapname, tier FROM ck_maptier WHERE tier = %s AND ranked = 1 ORDER BY mapname ASC;", szBuffer[0]);
 	else if (strlen(szBuffer[1]) > 0)
-		Format(szQuery, sizeof(szQuery), "SELECT mapname, tier FROM ck_maptier WHERE tier >= %s AND tier <= %s AND ranked = 1;", szBuffer[0], szBuffer[1]);
+		Format(szQuery, sizeof(szQuery), "SELECT mapname, tier FROM ck_maptier WHERE tier >= %s AND tier <= %s AND ranked = 1 ORDER BY mapname ASC;", szBuffer[0], szBuffer[1]);
 	else
-		Format(szQuery, sizeof(szQuery), "SELECT mapname, tier FROM ck_maptier AND ranked = 1;");
+		Format(szQuery, sizeof(szQuery), "SELECT mapname, tier FROM ck_maptier AND ranked = 1 ORDER BY mapname ASC;");
 
 	SQL_TQuery(g_hDb, SelectMapListCallback, szQuery, DBPrio_Low);
 }
