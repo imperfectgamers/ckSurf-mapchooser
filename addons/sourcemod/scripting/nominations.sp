@@ -477,11 +477,11 @@ public void SelectMapList()
 	ExplodeString(szTier, ".", szBuffer, 2, 32);
 
 	if (StrEqual(szBuffer[1], "0"))
-		Format(szQuery, sizeof(szQuery), "SELECT mapname, tier FROM ck_maptier WHERE tier = %s;", szBuffer[0]);
+		Format(szQuery, sizeof(szQuery), "SELECT mapname, tier FROM ck_maptier WHERE tier = %s AND ranked = 1;", szBuffer[0]);
 	else if (strlen(szBuffer[1]) > 0)
-		Format(szQuery, sizeof(szQuery), "SELECT mapname, tier FROM ck_maptier WHERE tier >= %s AND tier <= %s;", szBuffer[0], szBuffer[1]);
+		Format(szQuery, sizeof(szQuery), "SELECT mapname, tier FROM ck_maptier WHERE tier >= %s AND tier <= %s AND ranked = 1;", szBuffer[0], szBuffer[1]);
 	else
-		Format(szQuery, sizeof(szQuery), "SELECT mapname, tier FROM ck_maptier;");
+		Format(szQuery, sizeof(szQuery), "SELECT mapname, tier FROM ck_maptier AND ranked = 1;");
 
 	SQL_TQuery(g_hDb, SelectMapListCallback, szQuery, DBPrio_Low);
 }
@@ -503,6 +503,9 @@ public void SelectMapListCallback(Handle owner, Handle hndl, const char[] error,
 		while (SQL_FetchRow(hndl))
 		{
 			SQL_FetchString(hndl, 0, szMapName, sizeof(szMapName));
+			if (!IsMapValid(szMapName)) {
+			    continue;
+			}
 			tier = SQL_FetchInt(hndl, 1);
 			Format(szValue, sizeof(szValue), "%s - Tier %d", szMapName, tier);
 			g_MapList.PushString(szMapName);

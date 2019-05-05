@@ -609,6 +609,8 @@ void InitiateVote(MapChange when, ArrayList inputlist=null)
 		
 		/* Smaller of the two - It should be impossible for nominations to exceed the size though (cvar changed mid-map?) */
 		int nominationsToAdd = nominateCount >= voteSize ? voteSize : nominateCount;
+
+		int mapsAdded = 0;
 		
 		for (int i=0; i<nominationsToAdd; i++)
 		{
@@ -616,8 +618,11 @@ void InitiateVote(MapChange when, ArrayList inputlist=null)
 			g_NominateList.GetString(i, map, sizeof(map));
 			// GetMapDisplayName(map, displayName, sizeof(displayName));
 			GetMapDisplayNameTier(map, displayName, sizeof(displayName));
-			g_VoteMenu.AddItem(map, displayName);
-			RemoveStringFromArray(g_NextMapList, map);
+            if (IsMapValid(map)) {
+                g_VoteMenu.AddItem(map, displayName);
+                RemoveStringFromArray(g_NextMapList, map);
+                mapsAdded++;
+            }
 			
 			/* Notify Nominations that this map is now free */
 			Call_StartForward(g_NominationsResetForward);
@@ -640,12 +645,11 @@ void InitiateVote(MapChange when, ArrayList inputlist=null)
 		}
 		
 		/* There should currently be 'nominationsToAdd' unique maps in the vote */
-		
-		int i = nominationsToAdd;
+
 		int count = 0;
 		int availableMaps = g_NextMapList.Length;
 		
-		while (i < voteSize)
+		while (mapsAdded < voteSize)
 		{
 			if (count >= availableMaps)
 			{
@@ -659,9 +663,11 @@ void InitiateVote(MapChange when, ArrayList inputlist=null)
 			/* Insert the map and increment our count */
 			char displayName[PLATFORM_MAX_PATH];
 			// GetMapDisplayName(map, displayName, sizeof(displayName));
-			GetMapDisplayNameTier(map, displayName, sizeof(displayName));			
-			g_VoteMenu.AddItem(map, displayName);
-			i++;
+			GetMapDisplayNameTier(map, displayName, sizeof(displayName));
+			if (IsMapValid(map)) {
+			    g_VoteMenu.AddItem(map, displayName);
+			    mapsAdded++;
+			}
 		}
 		
 		/* Wipe out our nominations list - Nominations have already been informed of this */
@@ -1260,11 +1266,11 @@ public void SelectMapList()
 	ExplodeString(szTier, ".", szBuffer, 2, 32);
 
 	if (StrEqual(szBuffer[1], "0"))
-		Format(szQuery, sizeof(szQuery), "SELECT mapname, tier FROM ck_maptier WHERE tier = %s;", szBuffer[0]);
+		Format(szQuery, sizeof(szQuery), "SELECT mapname, tier FROM ck_maptier WHERE tier = %s AND ranked = 1;", szBuffer[0]);
 	else if (strlen(szBuffer[1]) > 0)
-		Format(szQuery, sizeof(szQuery), "SELECT mapname, tier FROM ck_maptier WHERE tier >= %s AND tier <= %s;", szBuffer[0], szBuffer[1]);
+		Format(szQuery, sizeof(szQuery), "SELECT mapname, tier FROM ck_maptier WHERE tier >= %s AND tier <= %s AND ranked = 1;", szBuffer[0], szBuffer[1]);
 	else
-		Format(szQuery, sizeof(szQuery), "SELECT mapname, tier FROM ck_maptier;");
+		Format(szQuery, sizeof(szQuery), "SELECT mapname, tier FROM ck_maptier AND ranked = 1;");
 
 	SQL_TQuery(g_hDb, SelectMapListCallback, szQuery, DBPrio_Low);
 }
