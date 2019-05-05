@@ -232,8 +232,7 @@ public void OnConfigsExecuted()
 	// }
 
 	SelectMapList();
-	
-	CreateNextVote();
+
 	SetupTimeleftTimer();
 	
 	g_TotalRounds = 0;
@@ -604,6 +603,8 @@ void InitiateVote(MapChange when, ArrayList inputlist=null)
 	/* No input given - User our internal nominations and maplist */
 	if (inputlist == null)
 	{
+	    CreateNextVote();
+
 		int nominateCount = g_NominateList.Length;
 		int voteSize = g_Cvar_IncludeMaps.IntValue;
 		
@@ -612,13 +613,13 @@ void InitiateVote(MapChange when, ArrayList inputlist=null)
 
 		int mapsAdded = 0;
 		
-		for (int i=0; i<nominationsToAdd; i++)
+		for (int i=0; i<nominateCount; i++)
 		{
 			char displayName[PLATFORM_MAX_PATH];
 			g_NominateList.GetString(i, map, sizeof(map));
 			// GetMapDisplayName(map, displayName, sizeof(displayName));
 			GetMapDisplayNameTier(map, displayName, sizeof(displayName));
-            if (IsMapValid(map)) {
+            if (IsMapValid(map) && mapsAdded < voteSize) {
                 g_VoteMenu.AddItem(map, displayName);
                 RemoveStringFromArray(g_NextMapList, map);
                 mapsAdded++;
@@ -630,21 +631,6 @@ void InitiateVote(MapChange when, ArrayList inputlist=null)
 			Call_PushCell(g_NominateOwners.Get(i));
 			Call_Finish();
 		}
-		
-		/* Clear out the rest of the nominations array */
-		for (int i=nominationsToAdd; i<nominateCount; i++)
-		{
-			g_NominateList.GetString(i, map, sizeof(map));
-			/* These maps shouldn't be excluded from the vote as they weren't really nominated at all */
-			
-			/* Notify Nominations that this map is now free */
-			Call_StartForward(g_NominationsResetForward);
-			Call_PushString(map);
-			Call_PushCell(g_NominateOwners.Get(i));
-			Call_Finish();			
-		}
-		
-		/* There should currently be 'nominationsToAdd' unique maps in the vote */
 
 		int count = 0;
 		int availableMaps = g_NextMapList.Length;
@@ -775,7 +761,6 @@ public void Handler_VoteFinishedGeneric(Menu menu,
 		
 		// We extended, so we'll have to vote again.
 		g_HasVoteStarted = false;
-		CreateNextVote();
 		SetupTimeleftTimer();
 		
 	}
@@ -785,7 +770,6 @@ public void Handler_VoteFinishedGeneric(Menu menu,
 		LogAction(-1, -1, "Voting for next map has finished. 'No Change' was the winner");
 		
 		g_HasVoteStarted = false;
-		CreateNextVote();
 		SetupTimeleftTimer();
 	}
 	else

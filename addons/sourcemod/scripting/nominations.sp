@@ -226,7 +226,7 @@ public Action Command_Nominate(int client, int args)
 	{
 		// We couldn't resolve the map entry to a filename, so...
 		ReplyToCommand(client, "%t", "Map was not found", mapname);
-		return Plugin_Handled;		
+		return Plugin_Handled;
 	}
 	
 	char displayName[PLATFORM_MAX_PATH];
@@ -324,9 +324,7 @@ void BuildMapMenu(int tier)
 		int status = MAPSTATUS_ENABLED;
 		
 		g_MapList.GetString(i, map, sizeof(map));
-		
-		FindMap(map, map, sizeof(map));
-		
+
 		char displayName[PLATFORM_MAX_PATH];
 		GetArrayString(g_MapListTier, i, displayName, sizeof(displayName));
 		// GetMapDisplayName(map, displayName, sizeof(displayName));
