@@ -339,44 +339,36 @@ public void OnMapTimeLeftChanged()
 
 void SetupTimeleftTimer()
 {
+    if (g_VoteTimer != null) {
+        KillTimer(g_VoteTimer);
+        g_VoteTimer = null;
+    }
+
 	int time;
 	if (GetMapTimeLeft(time) && time > 0)
 	{
 		int startTime = g_Cvar_StartTime.IntValue * 60;
-		if (time - startTime < 0 && g_Cvar_EndOfMapVote.BoolValue && !g_MapVoteCompleted && !g_HasVoteStarted)
-		{
+		if (time - startTime < 0 && g_Cvar_EndOfMapVote.BoolValue && !g_MapVoteCompleted && !g_HasVoteStarted) {
 			InitiateVote(MapChange_MapEnd, null);
-		}
-		else
-		{
-			if (g_VoteTimer != null)
-			{
-				KillTimer(g_VoteTimer);
-				g_VoteTimer = null;
-			}	
-			
-			//g_VoteTimer = CreateTimer(float(time - startTime), Timer_StartMapVote, _, TIMER_FLAG_NO_MAPCHANGE);
+		} else {
 			DataPack data;
-			g_VoteTimer = CreateDataTimer(float(time - startTime), Timer_StartMapVote, data, TIMER_FLAG_NO_MAPCHANGE);
 			data.WriteCell(MapChange_MapEnd);
 			data.WriteCell(INVALID_HANDLE);
 			data.Reset();
+			g_VoteTimer = CreateDataTimer(float(time - startTime), Timer_StartMapVote, data, TIMER_FLAG_NO_MAPCHANGE);
 		}		
 	}
 }
 
 public Action Timer_StartMapVote(Handle timer, DataPack data)
 {
-	if (timer == g_RetryTimer)
-	{
+	if (timer == g_RetryTimer) {
 		g_WaitingForVote = false;
 		g_RetryTimer = null;
-	}
-	else
-	{
+	} else {
 		g_VoteTimer = null;
 	}
-	
+
 	if (!g_MapList.Length || !g_Cvar_EndOfMapVote.BoolValue || g_MapVoteCompleted || g_HasVoteStarted)
 	{
 		return Plugin_Stop;
