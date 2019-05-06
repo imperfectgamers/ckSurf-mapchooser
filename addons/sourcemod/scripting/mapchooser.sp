@@ -352,10 +352,10 @@ void SetupTimeleftTimer()
 			InitiateVote(MapChange_MapEnd, null);
 		} else {
 			DataPack data;
+			g_VoteTimer = CreateDataTimer(float(time - startTime), Timer_StartMapVote, data, TIMER_FLAG_NO_MAPCHANGE);
 			data.WriteCell(MapChange_MapEnd);
 			data.WriteCell(INVALID_HANDLE);
 			data.Reset();
-			g_VoteTimer = CreateDataTimer(float(time - startTime), Timer_StartMapVote, data, TIMER_FLAG_NO_MAPCHANGE);
 		}		
 	}
 }
