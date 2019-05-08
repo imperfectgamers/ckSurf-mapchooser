@@ -312,6 +312,7 @@ public Action Timer_RetryAll(Handle hTimer) {
             LogMessage("Sending retry to %N", i);
         }
     }
+    return Plugin_Stop;
 }
 
 public Action Timer_ChangeMap(Handle hTimer)
