@@ -270,6 +270,7 @@ void StartRTV()
 			GetMapDisplayName(map, map, sizeof(map));
 			
 			PrintToChatAll("[SM] %t", "Changing Maps", map);
+			CreateTimer(4.9, Timer_RetryAll, _, TIMER_FLAG_NO_MAPCHANGE);
 			CreateTimer(5.0, Timer_ChangeMap, _, TIMER_FLAG_NO_MAPCHANGE);
 			g_InChange = true;
 			
@@ -302,6 +303,17 @@ void ResetRTV()
 	}
 }
 
+public Action Timer_RetryAll(Handle hTimer) {
+    for (int i = 1; i <= MaxClients; i++)
+    {
+        if (IsClientConnected(i) && !IsFakeClient(i))
+        {
+            ClientCommand(i, "retry");
+            LogMessage("Sending retry to %N", i);
+        }
+    }
+}
+
 public Action Timer_ChangeMap(Handle hTimer)
 {
 	g_InChange = false;
@@ -310,7 +322,7 @@ public Action Timer_ChangeMap(Handle hTimer)
 	
 	char map[PLATFORM_MAX_PATH];
 	if (GetNextMap(map, sizeof(map)))
-	{	
+	{
 		ForceChangeLevel(map, "RTV after mapvote");
 	}
 	
