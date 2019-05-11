@@ -111,6 +111,9 @@ Handle g_hDb = null;
 #define MAXTEAMS 10
 int g_winCount[MAXTEAMS];
 
+bool ServerStarted = false;
+bool RandomChange = false;
+
 #define VOTE_EXTEND "##extend##"
 #define VOTE_DONTCHANGE "##dontchange##"
 
@@ -258,6 +261,17 @@ public void OnConfigsExecuted()
 			LogError("Warning - Bonus Round Time shorter than Vote Time. Votes during bonus round may not have time to complete");
 		}
 	}
+}
+
+public void OnMapStart() {
+    if (!ServerStarted) {
+        ServerStarted = true;
+        char map[PLATFORM_MAX_PATH];
+        GetCurrentMap(map, sizeof(map));
+        if (StrEqual(map, "surf_kitsune")) {
+            RandomChange = true;
+        }
+    }
 }
 
 public void OnMapEnd()
@@ -599,9 +613,6 @@ void InitiateVote(MapChange when, ArrayList inputlist=null)
 
 		int nominateCount = g_NominateList.Length;
 		int voteSize = g_Cvar_IncludeMaps.IntValue;
-		
-		/* Smaller of the two - It should be impossible for nominations to exceed the size though (cvar changed mid-map?) */
-		int nominationsToAdd = nominateCount >= voteSize ? voteSize : nominateCount;
 
 		int mapsAdded = 0;
 		
@@ -1274,6 +1285,16 @@ public void SelectMapListCallback(Handle owner, Handle hndl, const char[] error,
 			g_MapList.PushString(szMapName);
 			g_MapListTier.PushString(szValue);
 		}
+	}
+
+	if (RandomChange) {
+	    RandomChange = false;
+	    if (g_MapList.Length > 0) {
+	        int selected = GetRandomInt(0, g_MapList.Length-1);
+	        char map[PLATFORM_MAX_PATH];
+	        g_MapList.GetString(selected, map, sizeof(map));
+	        ForceChangeLevel(map, "Crash Recovery");
+	    }
 	}
 }
 
